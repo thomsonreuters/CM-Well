@@ -51,7 +51,13 @@ object Retry extends DataToolsLogging with DataToolsConfig {
                    context: Option[T] = None,
                    response: Option[HttpResponse] = None,
                    count: Option[Int] = None,
-                   delay: FiniteDuration = 10.seconds)
+                   delay: FiniteDuration = 10.seconds){
+
+    def stringifyData(data: Seq[ByteString]) =
+      concatByteStrings(data, ByteString(",")).utf8String
+
+    override def toString: String = s"data: ${stringifyData(data)} vars: $vars context: $context response: $response count: $count delay: $delay"
+  }
 
   /**
     * Sends HTTP requests containing `Seq[ByteString]` payload data and context of type `T`.
@@ -131,7 +137,6 @@ object Retry extends DataToolsLogging with DataToolsConfig {
           }
 
           // schedule a retry to http stream
-//        e.discardBytes()
           val future = after(delay, system.scheduler)(Future.successful(data))
           Some(immutable.Seq(future -> state))
 
@@ -140,27 +145,26 @@ object Retry extends DataToolsLogging with DataToolsConfig {
           val errorID = res.##
 
           if (data.size > 1) {
-            // before retry a request we should consume previous entity bytes
-            e.withoutSizeLimit()
-              .dataBytes
-              .runFold(blank)(_ ++ _)
-              .map { entityBytes =>
+              // before retry a request we should consume previous entity bytes
+              e.withoutSizeLimit()
+                .dataBytes
+                .runFold(blank)(_ ++ _)
+                .map { entityBytes =>
 
-                logger.warn(s"[$errorID] server error. Body of response: ${entityBytes.utf8String}, headers: ${headersString(h)}")
-
-                logger.warn(
-                  s"$labelValue server error:  will retry again in $delay to send a single request, host=${getHostnameValue(
-                    h
-                  )} status=$s, entity=${entityBytes.utf8String}, request data=${stringifyData(data)}"
-                )
-                redLogger.error(
-                  s"$labelValue server error: host=${getHostnameValue(h)} status=$s data=${stringifyData(data)} entity=${entityBytes.utf8String}"
-                )
-                badDataLogger.info(
-                  s"$labelValue data=${concatByteStrings(data, endl).utf8String}"
-                )
-              }
-
+                  logger.warn(s"[$errorID] $labelValue server error:  Batch request failed. Will try to send a single request in $delay.\n" +
+                    s"host=${
+                      getHostnameValue(
+                        h
+                      )
+                    } status=$s, headers: ${headersString(h)}, Body of response:${entityBytes.utf8String}, request data=${stringifyData(data)}"
+                  )
+                  redLogger.error(
+                    s"$labelValue server error: host=${getHostnameValue(h)} status=$s data=${stringifyData(data)} entity=${entityBytes.utf8String}"
+                  )
+                  badDataLogger.info(
+                    s"$labelValue data=${concatByteStrings(data, endl).utf8String}"
+                  )
+                }
             // failed to send a chunk of data, split to singles and retry
             Some(
               data
@@ -298,13 +302,13 @@ object Retry extends DataToolsLogging with DataToolsConfig {
               // 200 OK, but errors response validator returned false
               logger.warn(s"$labelValue received $s but response body is not valid. " +
                 s"host=${getHostnameValue(h)} data=${stringifyData(data)}")
-            case _ => logger.warn(s"$labelValue error: host=${getHostnameValue(h)}" +
+            case _ => e.discardBytes()
+              logger.warn(s"$labelValue error: host=${getHostnameValue(h)}" +
                 s" status=$s data=${stringifyData(data)}")
           }
 
           count match {
             case Some(c) if c > 0 =>
-              e.discardBytes()
               logger.debug(
                 s"$labelValue received $s, count=$count will retry again in $delay host=${getHostnameValue(h)}"
               )
@@ -320,7 +324,6 @@ object Retry extends DataToolsLogging with DataToolsConfig {
               )
               None
             case None =>
-              e.discardBytes()
               logger.warn(
                 s"$labelValue received $s, will retry again in $delay host=${getHostnameValue(h)} data=${stringifyData(data)}"
               )
@@ -373,7 +376,7 @@ object Retry extends DataToolsLogging with DataToolsConfig {
               None
             case None =>
               logger.warn(
-                s"$labelValue error: could not send http request, will retry again in $delay data=${stringifyData(data)}"
+                s"$labelValue error: could not send http request, will retry again in $delay data=${stringifyData(data)}. Going to retry with state: $state"
               )
               val future =
                 after(delay, system.scheduler)(Future.successful(data))
@@ -413,7 +416,6 @@ object Retry extends DataToolsLogging with DataToolsConfig {
         case (response @ Success(HttpResponse(s, _, e, _)), state)
             if !s.isSuccess() =>
           // consume HTTP response bytes
-          e.discardBytes()
           logger.error(s"$labelValue status is not success ($s) $e")
           Future.successful(Failure(new Exception(s"status is not success ($s) $e")) -> state.copy(response = response.toOption))
         case (response @ Success(res @ HttpResponse(s, headers, e, _)), state) =>
@@ -448,7 +450,7 @@ object Retry extends DataToolsLogging with DataToolsConfig {
             case err =>
               logger.error(
                 s"$labelValue error in consuming data bytes from response, paths=${stringifyData(state.data)}, err=$err",
-                err
+                err  //MORIA Code review - add e.discardBytes() ?
               )
               Failure(err) -> state.copy(response = response.toOption)
           }
