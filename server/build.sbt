@@ -26,6 +26,10 @@ def refreshVersion = Command.command("refreshVersion") { state =>
   appendWithoutSession(Seq(), state) // do something with v: inc.Analysis
 }
 
+coverageMinimum := 70
+coverageFailOnMinimum := false
+coverageHighlighting := true
+
 ThisBuild / commands += refreshVersion
 
 val dirtyEnd = """.*(\d\d\d\d\d\d\d\d)(-\d\d\d\d)$""".r
