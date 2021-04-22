@@ -117,7 +117,6 @@ object ApplicationUtils {
 @Singleton
 class Application @Inject()(bulkScrollHandler: BulkScrollHandler,
                             activeInfotonGenerator: ActiveInfotonGenerator,
-                            cachedSpa: CachedSpa,
                             crudServiceFS: CRUDServiceFS,
                             streams: Streams,
                             authUtils: AuthUtils,
@@ -2519,20 +2518,6 @@ callback=< [URL] >
         case Some(i) =>
           val maskedInfoton = i.masked(fieldsMask)
 
-          def infotonIslandResult(prefix: String, suffix: String) = {
-            val infotonStr = formatterManager.getFormatter(JsonlType, timeContext).render(maskedInfoton)
-
-            //TODO: find out why did we use "plumbing" API. we should let play determine content length etc'...
-            val r = Ok(prefix + Utility.escape(infotonStr) + suffix)
-              .as(overrideMimetype("text/html;charset=UTF-8", request)._2)
-              .withHeaders(getNoCacheHeaders(): _*)
-            //          val contentBytes = (prefix + Utility.escape(infotonStr) + suffix).getBytes("UTF-8")
-            //          val r = new Result(header = ResponseHeader(200, Map(
-            //            CONTENT_LENGTH -> String.valueOf(contentBytes.length), overrideMimetype("text/html;charset=UTF-8", request))
-            //                              ++ getNoCacheHeaders().toMap), body = Enumerator(contentBytes))
-            Future.successful(r)
-          }
-
           //TODO: use formatter manager to get the suitable formatter
           request.getQueryString("format") match {
             case Some(FormatExtractor(formatType)) => {
@@ -2575,15 +2560,15 @@ callback=< [URL] >
                   Future.successful(Redirect(routes.Application.handleGET(s"${c.systemFields.path}/index.html".substring(1))))
                 // ui
                 case _ => {
-                  val isOldUi = request.queryString.keySet("old-ui")
-                  cachedSpa.getContent(isOldUi).flatMap { markup =>
-                    if (markup eq null)
-                      Future.successful(
-                        ServiceUnavailable("System initialization was not yet completed. Please try again soon.")
-                      )
-                    else
-                      infotonIslandResult(markup + "<inject>", "</inject>")
+                  val params = {
+                    val webapp = if (request.queryString.keySet("old-ui")) "webapp=angular"
+                                 else request.getQueryString("webapp").fold("")(wa => s"webapp=$wa")
+                    val remember = if (request.queryString.keySet("remember")) "remember" else ""
+                    val path = s"""path=${request.getQueryString("path").orElse(infoton.map(_.systemFields.path)).getOrElse("")}"""
+                    val all = Seq(webapp, remember, path).filterNot(_.isEmpty).mkString("&")
+                    if(all.isEmpty) "" else s"?$all"
                   }
+                  Future.successful(Redirect(routes.Application.handleGET(s"meta/app/boot.html$params"))) // 🚀
                 }
               }
           }
@@ -3238,31 +3223,6 @@ object XCmWellType {
 case class CMWellPostType(xCmWellType: String) {
   def unapply(request: RequestHeader): Boolean =
     request.headers.get("X-CM-WELL-TYPE").exists(_.equalsIgnoreCase(xCmWellType))
-}
-
-@Singleton
-class CachedSpa @Inject()(crudServiceFS: CRUDServiceFS)(implicit ec: ExecutionContext) extends LazyLogging {
-
-  val oldCache = new SingleElementLazyAsyncCache[String](600000)(doFetchContent(true))
-  val newCache = new SingleElementLazyAsyncCache[String](600000)(doFetchContent(false))
-
-  private val contentPath = "/meta/app/old-ui/index.html"
-  private val newContentPath = "/meta/app/main/index.html"
-
-  private def doFetchContent(isOldUi: Boolean): Future[String] = {
-    val path = if (isOldUi) contentPath else newContentPath
-    crudServiceFS.getInfotonByPathAsync(path).collect {
-      case FullBox(FileInfoton(_,_, Some(c))) => new String(c.data.get, "UTF-8")
-      case somethingElse => {
-        logger.error("got something else: " + somethingElse)
-        throw new SpaMissingException("SPA Content is currently unreachable")
-      }
-    }
-  }
-
-  def getContent(isOldUi: Boolean): Future[String] =
-    if (isOldUi) oldCache.getAndUpdateIfNeeded
-    else newCache.getAndUpdateIfNeeded
 }
 
 class SpaMissingException(msg: String) extends Exception(msg)

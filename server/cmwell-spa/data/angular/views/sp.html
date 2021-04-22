@@ -1,0 +1,87 @@
+<div class=sp>
+    <h3>CM-Well _sp <small><b>BETA</b></small></h3>
+    <p><b>Alternatively, try <a href="/_sparql">SPARQL on whole graph BETA</a></b></p>
+    <div class=pane>
+        <textarea id=urls placeholder=CM-Well paths></textarea><br/>
+        <textarea id=query placeholder=Query></textarea><br/>
+        <select id=ql>
+            <option class=not-displayed selected value=SPARQL>Query Language</option>
+            <option value=SPARQL>SPARQL</option>
+            <!--<option value=Gremlin>Gremlin</option>-->
+        </select>
+        <select id=format>
+            <option class=not-displayed selected value=ascii>Results Format</option>
+            <option value=ascii>ASCII</option>
+            <option value=tsv>TSV</option>
+            <option value=rdf>RDF</option>
+            <option value=xml>XML</option>
+            <option value=json>JSON</option>
+        </select>
+        <button>POST!</button>
+
+        <br/>
+        <br/>
+
+        <label><input type=checkbox id=quads>Include Quads</label><br/>
+        <label><input type=checkbox id=verbose>Verbose Mode</label><br/>
+        <label><input type=checkbox id=show-graph>Show Graph</label><br/>
+
+        <label style=text-shadow:0px 0px 3px yellow;><input type=checkbox id=visualize ng-model=visualize>Visualize</label>
+        <!--<label ng-show=visualize><input type=checkbox id=hide-paths>Hide URLs</label><br/>-->
+
+
+    </div>
+    <div class=results pane>
+        <img class="loading not-displayed" src=/meta/app/angular/images/loading.gif/>
+        <textarea class="not-displayed" disabled placeholder=Results></textarea>
+        <img class="pop-out not-displayed" src=/meta/app/angular/images/link-out.svg />
+    </div>
+
+
+    <!--<div class=sliders style="position:absolute;width:290px;border: 1px solid black;padding: 20px;background: rgb(252, 252, 235);">-->
+       <!--<div>linkStrength  </div><div style="margin-bottom:13px" class="slider" id="linkStrength"   data-k="1"   data-nonnegative="true" ></div>-->
+       <!--<div>friction      </div><div style="margin-bottom:13px" class="slider" id="friction"       data-k="1"   data-nonnegative="true" ></div>-->
+       <!--<div>linkDistance  </div><div style="margin-bottom:13px" class="slider" id="linkDistance"   data-k="400" data-nonnegative="true" ></div>-->
+       <!--<div>charge        </div><div style="margin-bottom:13px" class="slider" id="charge"         data-k="500" data-nonnegative="false"></div>-->
+       <!--<div>chargeDistance</div><div style="margin-bottom:13px" class="slider" id="chargeDistance" data-k="150" data-nonnegative="true" ></div>-->
+       <!--<div>gravity       </div><div style="margin-bottom:13px" class="slider" id="gravity"        data-k="1"   data-nonnegative="true" ></div>-->
+       <!--<div>theta         </div><div style="margin-bottom:13px" class="slider" id="theta"          data-k="1"   data-nonnegative="true" ></div>-->
+       <!--<div>alpha         </div><div style="margin-bottom:13px" class="slider" id="alpha"          data-k="1"   data-nonnegative="true" ></div>-->
+       <!--<div>radius        </div><div style="margin-bottom:13px" class="slider" id="radius"         data-k="100" data-nonnegative="true" ></div>-->
+    <!--</div>-->
+
+    <!--<script>-->
+        <!--$('.sliders').css('width', '290px').draggable();-->
+
+        <!--$('.slider').each(function(){-->
+            <!--var what = this.id, k = $(this).data('k');-->
+            <!--$(this).slider({ min: $(this).data('nonnegative')?0:-1, max:1, step:0.01 })-->
+                    <!--.on('slidechange', function(e,ui){-->
+                        <!--var amount = k*ui.value;-->
+                        <!--if(what==='radius') { $('circle').attr('r', amount); return; }-->
+                        <!--force[what](amount).start();-->
+                    <!--});-->
+        <!--});-->
+
+        <!--forceMethods = { // yes, this is a global variable. May the `force` be global as well.-->
+
+            <!--info: function () {-->
+                <!--$('.slider').each(function () {-->
+                    <!--console.log(this.id + ' = ' + $(this).data('k') * $(this).slider('value'));-->
+                <!--});-->
+            <!--}-->
+
+            <!--, update: function () {-->
+                <!--$('.sliders').find('.slider').each(function () {-->
+                    <!--if (this.id === 'radius') {-->
+                        <!--$(this).slider('value', $('circle').attr('r') / 100);-->
+                        <!--return;-->
+                    <!--}-->
+                    <!--$(this).slider('value', force[this.id]() / $(this).data('k'));-->
+                <!--});-->
+            <!--}-->
+        <!--};-->
+
+    <!--</script>-->
+
+</div>

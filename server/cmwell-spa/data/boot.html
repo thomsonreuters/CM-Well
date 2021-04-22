@@ -1,0 +1,8 @@
+<HTML><title>CM-Well</title><script>
+/* CM-Well WebApps Bootstrapper 🚀 */
+deflt='react'
+lo=location;ls=localStorage;p=new URLSearchParams(lo.search)
+w=p.get`webapp`||ls.getItem`wa`||deflt
+p.has`remember`&&ls.setItem('wa',w)
+lo.href=`/meta/app/${w}/index.html?path=${p.get('path')||'/'}`
+</script></HTML>

@@ -1,0 +1,214 @@
+<div class="toolbar">
+    <ul>
+        <li class="first"><span class="cmw-row menu-bullet atom" title="Atom Feed">&nbsp;</span></li>
+
+        <li class="format">
+            <select class="cmw-row sub-menu format-menu">
+                <option class="not-displayed" selected>Format</option>
+                <option ng-repeat="format in formats" value="{{format.value}}" class="cmw-row">{{format.displayName}}</option>
+            </select>
+        </li>
+
+        <li>
+            <span class="menu-bullet view-with-history" style="padding-right: 0;margin-right: -6px;">&nbsp;</span>
+            <select class="cmw-row sub-menu history-menu">
+                <option class="not-displayed" selected>History</option>
+                <option value="" class="cmw-row">(default) - Atom</option>
+                <option value="diff" class="cmw-row">Diff. View</option>
+                <option ng-repeat="format in formats" value="{{format.value}}" class="cmw-row">{{format.displayName}}</option>
+            </select>
+
+        </li>
+
+        <!--<li>-->
+            <!--<span class="cmw-row link incoming-links" ng-hide="infoton.system.path=='/'"><img width="16" src="/meta/app/angular/images/links-icon.svg"/>&nbsp;Links</span>-->
+        <!--</li>-->
+
+        <li class="help-icon">
+            <span class="cmw-row">
+                <a target="_blank" href="/meta/docs/CM-Well.RootTOC.md"><img src="/meta/app/angular/images/help-icon.png">HELP</a>
+            </span>
+        </li>
+
+        <span class="field-related-menus not-displayed">
+
+        <li class="field-select">
+            <select class="cmw-row blank sub-menu search-field-menu">
+                <option class="not-displayed" value="" selected>Field</option>
+            </select>
+        </li>
+
+        <li class="search"><span class="cmw-row search-menu-title">Search...</span>
+            <div class="search-menu not-displayed">
+                    <input id="term"/><img class="search-icon" src="/meta/app/angular/images/mag.png"/>
+            </div>
+        </li>
+
+        <li class="analytical" title="Please select a Field first">
+            <label class="cmw-row" title="unchecking this will run queries in Analyzed Term mode - considering values as full text"><input type="checkbox" name="exact" id="exact" checked="checked"><span>Exact Term</span></label>
+            <select class="cmw-row sub-menu analytical-menu" disabled="disabled">
+                <option class="not-displayed" selected>Analytical</option>
+                <option value="2" class="cmw-row textual">Distribution</option>
+                <option value="1" class="cmw-row textual">Significant Terms</option>
+                <option value="5" class="cmw-row textual">Cardinality</option>
+                <option value="3" class="cmw-row numerical">Histogram</option>
+                <option value="4" class="cmw-row numerical">Statistics</option>
+            </select>
+        </li>
+
+        <li class="cmw-row" ng-click="openAggregationDialog('lg')" ng-controller="aggregationsController" style="display:none">
+            Aggregation Request Builder
+        </li>
+
+        <span class="info"></span>
+
+        </span>
+
+    </ul>
+</div>
+
+<div class="title-and-pager hr">
+    <div class="breadcrumbs-container">
+        <div class="breadcrumbs" ng-bind-html="currentPath"></div>
+        <span class="types-navi-button" ng-if="!(currentNaviField || naviFields) && !naviFieldsActivated" ng-click="loadNaviFields()"><img src="/meta/app/angular/images/types.svg"/ title="by types"></span>
+    </div>
+    <cmwell-navi-fields></cmwell-navi-fields>
+    <div style="display:inline-block;width:100%" ng-if="pager.active">
+        <span class="pager-title">{{ pager.from }} - {{ pager.until }} out of {{ pager.total.toLocaleString() }} total</span>
+        <cmwell-pager></cmwell-pager>
+    </div>
+    <div class="pager-title-small" ng-if="!pager.active && pager.total">{{ pager.total.toLocaleString() }} total</div>
+</div>
+
+<vital-sign></vital-sign>
+
+<div class="flex-container">
+
+    <div class="navigation flex-item">
+
+        <span ng-if="gracefulDegradation" class="error-msg">
+            Listing children of <i>{{infoton.system.path}}</i> is currently unavailable.<br/>
+            You can still read Infotons in direct access.
+        </span>
+
+        <span ng-if="ajaxError" class="error-msg">
+            <span class="title">&ldquo;Oh bother!&rdquo;</span><br/>
+            <span class="content">
+                HTTP {{ajaxError.statusCode}}{{ajaxError.data ? ': '+ajaxError.data : ''}}
+            </span></br>
+        </span>
+
+        <span class="links-with-images">
+            <a href="{{ item.type==='FileInfoton' ? '#' : item.linkTo || item.path }}" data-path="{{item.path}}" class="cmw-row {{ item.additionalCssClasses }}" ng-class="item.displayName ? 'with-display-name' : ''" ng-repeat="item in infotons">
+                <span class="icon" data-mime="{{item.mimetype}}">&nbsp;</span>
+                <span ng-if="item.displayName" class="infoton-display-name">{{item.displayName}}<br/></span>
+                <span ng-class="item.displayName ? 'infoton-path' : ''" ellipsis>{{item.displayName ? item.path : item.path.substring(item.path.lastIndexOf('/') + 1).replace('%23','#').replace('%25','%')}}</span>
+                <span ng-if="item.linkTo" class="link-infoton-target not-displayed">{{item.linkTo}}</span>
+                <span class="floaty not-displayed" ng-bind-html="item.floaty | toFloatyMarkup"></span>
+            </a>
+
+            <div class="add-user-button" ng-if="editMode && infoton.system.path=='/meta/auth/users'"></div>
+            <div class="add-user-form not-displayed">
+                <h3>Add User</h3>
+                <dl>
+                    <dt>Username</dt>
+                    <dd><input id="username"/></dd>
+
+                    <dt>Password</dt>
+                    <dd><span id="password"><img src="/meta/app/angular/images/loading2.gif"/></span><span class="reload">re-generate</span></dd>
+
+                    <dt>Permissions</dt>
+                    <dd><textarea></textarea></dd>
+
+                    <dt class="empty">&nbsp;</dt>
+                    <dd>
+                        <button class="upload-user">Create</button>
+                        <button class="cancel">Cancel</button>
+                        <span class="loading not-displayed"><img src="/meta/app/angular/images/loading2.gif"/></span>
+                    </dd>
+                </dl>
+            </div>
+
+        </span>
+
+        <a class="cmw-row" ng-href="{{infoton.system.path}}" target="_blank" ng-if="fileInfoton" style="font-size: 12px;">&gt; Download FileInfoton</a>
+
+    </div>
+    <div class="infoton-view flex-item" ng-if="(infoton.system.path && infoton.system.path!='/')">
+            <h2 class="infoton-part-title"><span class="collapse-handle"></span> System</h2>
+            <div class="part">
+                <table cellpadding="0" cellspacing="0">
+                <tr ng-repeat="(k, v) in (infoton.system | visibleSystemFields)">
+                    <td>{{ k }}</td><td>{{ v }}<span class="hidden-info" ng-if="k==='lastModified'">{{ infoton.system.indexTime | asDate }}</span></td>
+                </tr>
+                </table>
+            </div>
+            <br/>
+
+            <h2 class="infoton-part-title"><span class="collapse-handle"></span> Object</h2>
+            <div class="part">
+                <table cellpadding="0" cellspacing="0" id="infoton-fields">
+                <tr ng-repeat="(key, value) in infoton.fields">
+                    <td>{{ key.replace('.nn','') }}</td>
+                        <td>
+                            <ul>
+                                <li class="editable-value" ng-repeat="item in value" ng-bind-html="item | rdfValueToHtml"></li>
+                            </ul>
+                        </td>
+                </tr>
+                <tr ng-if="editMode" class="new-value">
+                    <td class="editable-value">+</td>
+                    <td class="editable-value"></td>
+                </tr>
+                </table>
+                <span class="edit-controls" ng-if="editMode">
+                    <div class="warn">Warning: All values will be stored as Strings</div>
+                    <button id="commit">Save</button>
+                    <select id="raw-edit">
+                        <option class="not-displayed" selected>Raw Edit...</option>
+                        <option ng-repeat="format in formats | is:'Rdf'" value="{{format.value}}">{{format.displayName}}</option>
+                    </select>
+                    <button id="cancel" class="not-displayed">Cancel</button>
+                </span>
+            </div>
+    </div>
+
+    <div class="flex-item home-image" ng-if="infoton.system.path=='/'">
+        <img src="/meta/app/angular/images/home.png" />
+        <span ng-if="!editMode" class="hidden-door">&#9998;</span>
+        <a href="/_upload" style="position:absolute;left:205px;top:116px;display:block;width:11px;height:18px;"></a>
+        <span ng-click="login()" style="position:absolute;left:319px;top:47px;display:block;width:24px;height:23px;"></span>
+        <a href="/_sp" style="position:relative;left:19px;top:-132px;display:block;width:16px;height:16px;color:#CACACA !important;font-size:11px;text-align:center;">S</a>
+        <a href="/_jwtdebug" style="width:16px;height:16px;display:block;position:relative;left:44px;top:-377px;color:#505050 !important;font-size:11px;text-align:center;">T</a>
+        <a href="/_adddn" style="width:16px;height:16px;display:block;position:relative;left: 77px;top: -415px;color:#505050 !important;font-size:11px;text-align:center;">&nbsp;</a>
+        <a href="/meta/app/angular/react/index.html" target="_blank" style="position:relative;left:346px;top:-192px;display:block;width:16px;height:16px;"><img style="width:14px;height:14px;opacity:0.3;position:relative;" src="data:image/svg+xml;utf8,&lt;svg version=&quot;1.1&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; xmlns:xlink=&quot;http://www.w3.org/1999/xlink&quot; x=&quot;0px&quot; y=&quot;0px&quot; viewBox=&quot;0 0 1000 1000&quot; enable-background=&quot;new 0 0 1000 1000&quot; xml:space=&quot;preserve&quot;&gt;&#10;&lt;g&gt;&lt;g&gt;&lt;path d=&quot;M500,10C229.8,10,10,229.8,10,500c0,270.2,219.8,490,490,490c270.2,0,490-219.8,490-490C990,229.8,770.2,10,500,10z M500,898.4c-219.7,0-398.4-178.7-398.4-398.4S280.3,101.6,500,101.6S898.4,280.3,898.4,500S719.7,898.4,500,898.4z&quot;/&gt;&lt;rect x=&quot;261.9&quot; y=&quot;438.9&quot; width=&quot;476.2&quot; height=&quot;122.1&quot;/&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;g&gt;&lt;/g&gt;&lt;/g&gt;&#10;&lt;/svg&gt;"/></a>
+    </div>
+</div>
+
+<div class="hr" style="margin-top:28px;">
+    <cmwell-pager ng-if="pager.active"></cmwell-pager>
+</div>
+
+<!--
+<script type="text/ng-template" id="dialog.html" ng-cont1roller="aggregationsController">
+    <div class="modal-header">
+        <h3 class="modal-title">Aggregation Request</h3>
+    </div>
+    <div class="modal-body">
+        <!-- todo - use AngularUI Bootstrap Dropdown -->
+<!--
+        <select class="cmw-row sub-menu analytical-menu" ng-model="selectedType">
+            <option ng-repeat="type in aggregationTypes" value="{{type.value}}" ng-click="setSelected(type.value)">{{type.name}}</option>
+        </select>
+        <br/>
+        <label class="cmw-row" title="unchecking this will run queries in Analyzed Term mode - considering values as full text"><input type="checkbox" name="exact" id="exact" checked="checked"><span>Exact Term</span></label>
+        <br/>
+        <i>... More options to be implemented</i>
+
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">OK</button>
+        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+    </div>
+</script>
+-->

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html manifest="/meta/app/react/cmwell.appcache">
+<head>
+<meta charset="utf-8" />
+
+<title>CM-Well</title>
+
+<link rel="icon" type="image/png" href="/meta/app/react/images/favicon.ico"/>
+
+<link rel="stylesheet" href="/meta/app/react/css/cmwell.css" />
+<link rel="stylesheet" href="/meta/app/react/css/fonts.css" />
+
+<script data-main="/meta/app/react/scripts/main" src="/meta/app/react/scripts/lib/require.js"></script>
+
+</head>
+<body>
+
+<!-- SPINNER -->
+<style type="text/css">.spinner-container { display: flex; width: 100%; position: absolute; z-index: 100; margin-top: 40px; } .spinner { margin: 100px auto; width: 100px; height: 100px; position: relative; } .dot { width: 100%; height: 100%; position: absolute; left: 0; top: 0; } .dot::before { content: ''; display: block; margin: 0 auto; width: 15%; height: 15%; background-color: rgb(255, 128, 0); border-radius: 100%; animation: circle-pulse 1.2s infinite linear both; } .dot-two { transform: rotate(30deg) } .dot-three { transform: rotate(60deg) } .dot-four { transform: rotate(90deg); } .dot-five { transform: rotate(120deg); } .dot-six { transform: rotate(150deg); } .dot-seven { transform: rotate(180deg); } .dot-eight { transform: rotate(210deg); } .dot-nine { transform: rotate(240deg); } .dot-ten { transform: rotate(270deg); } .dot-eleven { transform: rotate(300deg); } .dot-twelve { transform: rotate(330deg); } .dot-two::before { animation-delay: -1.1s; } .dot-three::before { animation-delay: -1s; } .dot-four::before { animation-delay: -0.9s; } .dot-five::before { animation-delay: -0.8s; } .dot-six::before { animation-delay: -0.7s; } .dot-seven::before { animation-delay: -0.6s; } .dot-eight::before { animation-delay: -0.5s; } .dot-nine::before { animation-delay: -0.4s; } .dot-ten::before { animation-delay: -0.3s; } .dot-eleven::before { animation-delay: -0.2s; } .dot-twelve::before { animation-delay: -0.1s; } @keyframes circle-pulse { 0%, 50%, 100% { transform: scale(0.35); } 25%, 75% { transform: scale(1); } }</style>
+<div class='spinner-container'><div class='spinner'><div class='dot dot-one'></div><div class='dot dot-two'></div><div class='dot dot-three'></div><div class='dot dot-four'></div><div class='dot dot-five'></div><div class='dot dot-six'></div><div class='dot dot-seven'></div><div class='dot dot-eight'></div><div class='dot dot-nine'></div><div class='dot dot-ten'></div><div class='dot dot-eleven'></div><div class='dot dot-twelve'></div></div></div>
+<!-- HAVING THIS SPINNER INLINED RATHER THAN IN AN EXTRERNAL SCRIPT FILE,
+     WAS INTENTIONALLY IN FAVOR OF SLOW CONNECTIONS, TO SEE LOADING ANIMATION WHILE APP IS LOADED.
+// Thanks to Jonathan Rajavuori from Eagan for the beautiful pure css implementation -->
+
+    <!-- Reactjs App will be mounted to the content div -->
+    <div id="content" style="display:none"></div>
+
+    <div id="loading-status" style="width:100%;position:absolute;top:255px;text-align:center;color:#888"></div>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+<div class="fields-navi" ng-if="!currentNaviFields && (naviFields || naviFieldsAreLoading)">
+	<div class="conatainer" ng-if="naviFields && naviFields.length">
+		<div class="navi-field" ng-repeat="field in naviFields"><a href="{{ field.link }}" title="{{ field.fullName }}">{{ field.name }}</a><span class="amount">({{ field.amount }})</span></div>
+	</div>
+	<div class="more" ng-if="naviFields && naviFields.length>5"><a>... more</a></div>
+
+	<span class="navi-field" ng-if="naviFields && !naviFields.length">(looks like there are no <b>type.rdf</b> values here)</span>
+	<img class="navi-field" ng-if="naviFieldsAreLoading" src="/meta/app/angular/images/rolling.gif" width="16" />
+</div>

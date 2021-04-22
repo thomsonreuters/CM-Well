@@ -1,0 +1,31 @@
+<style>
+.link {
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.node {
+  fill: #E8E8E8;
+  stroke: #000;
+  stroke-width: 1px;
+  filter: url(/_vld/#dropshadow);
+}
+
+.node.root {
+  fill: #FFE0B8;
+}
+
+text {
+    fill: #000;
+    font-size: 12px;
+    font-family: Arial;
+    cursor: default;
+    pointer-events: none; /* bubbling mouse events to parent */
+}
+
+.loading {
+    position: absolute;
+}
+</style>
+<script>vld();</script>
+<img class="loading not-displayed" src="/meta/app/angular/images/loading.gif"/>
