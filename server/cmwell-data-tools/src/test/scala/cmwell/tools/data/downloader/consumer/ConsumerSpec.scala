@@ -217,7 +217,7 @@ class ConsumerSpec extends BaseWiremockSpec {
     result.flatMap{_ => 1 should be (1)}
   }
 
- /* it should "be retry against persistent 5xx errors to a defined limit" in {
+  it should "be retry against persistent 5xx errors to a defined limit" in {
 
     val ec = scala.concurrent.ExecutionContext.Implicits.global
 
@@ -240,7 +240,7 @@ class ConsumerSpec extends BaseWiremockSpec {
       future.map(_ => 1)
     }.map ( _ => assert(wireMockServer.getAllServeEvents.size == expectedRetries + 1) )
 
-  }*/
+  }
 
 
 }
